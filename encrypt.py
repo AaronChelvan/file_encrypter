@@ -1,6 +1,7 @@
 import sys
 import bcrypt
 from Crypto.Cipher import AES
+from Crypto.Util import Padding
 import binascii
 import os
 
@@ -22,16 +23,19 @@ key = bcrypt.kdf(password=PASSKEY, salt=PASSKEY, desired_key_bytes=32, rounds=10
 
 print(file_data)
 
+# Apply padding
+file_data = Padding.pad(data_to_pad=file_data, block_size=16)
+
+# Encrypt the padded data
 IV = os.urandom(16)
 encrypter = AES.new(key, AES.MODE_CBC, IV=IV)
-
-#TODO - Padding
-while len(file_data)%16 != 0:
-	file_data += b"0"
-
 ciphertext = encrypter.encrypt(file_data)
 print(ciphertext)
 
+# Decrypter the padded data
 decrypter = AES.new(key, AES.MODE_CBC, IV=IV)
 plaintext = decrypter.decrypt(ciphertext)
+
+# Remove the padding to obtain the original text
+plaintext = Padding.unpad(padded_data=plaintext, block_size=16)
 print(plaintext)
