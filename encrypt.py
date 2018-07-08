@@ -42,28 +42,28 @@ hashed_passkey = bcrypt.hashpw(PASSKEY, bcrypt.gensalt(rounds=12))
 print(hashed_passkey)
 print(len(hashed_passkey))	
 
-with open(OUTPUT_FILE, 'w') as f:
-	f.write(str(hashed_passkey) + "|||" + str(IV) + "|||" + str(ciphertext))
+with open(OUTPUT_FILE, 'wb') as f:
+	f.write(hashed_passkey + IV + ciphertext)
 
 #elif FUNCTION == "decrypt":
-with open(OUTPUT_FILE, 'r') as f:
+with open(OUTPUT_FILE, 'rb') as f:
 	file_data = f.read()
 
 # The encrypted file consists of: hashed passkey + IV + encrypted data
-#hashed_passkey = file_data[0:60]
-#IV = file_data[60:60 + BLOCK_SIZE]
-#ciphertext = file_data[60 + BLOCK_SIZE:]
-hashed_passkey = file_data.split("|||")[0]
-IV2 = file_data.split("|||")[1]
-ciphertext = file_data.split("|||")[2]
+hashed_passkey = file_data[0:60]
+IV = file_data[60:60 + BLOCK_SIZE]
+ciphertext = file_data[60 + BLOCK_SIZE:]
+#hashed_passkey = file_data.split("|||")[0]
+#IV = file_data.split("|||")[1]
+#ciphertext = file_data.split("|||")[2]
 
 print("hashed_passkey = ")
 print(hashed_passkey)
 print("\nIV = ")
-print(IV2)
+print(IV)
 print("\nciphertext = ")
 print(ciphertext)
-print(ciphertext.encode("latin-1"))
+#print(ciphertext.encode("latin-1"))
 
 # Verify that the passkey is correct
 
@@ -71,8 +71,11 @@ print(ciphertext.encode("latin-1"))
 
 # Decrypt the padded data
 decrypter = AES.new(key, AES.MODE_CBC, IV=IV)
-plaintext = decrypter.decrypt(ciphertext.encode("utf-8"))
+plaintext = decrypter.decrypt(ciphertext)
 
 # Remove the padding to obtain the original text
 plaintext = Padding.unpad(padded_data=plaintext, block_size=BLOCK_SIZE)
 print(plaintext)
+
+with open(OUTPUT_FILE, 'wb') as f:
+	f.write(plaintext)
