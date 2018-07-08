@@ -23,31 +23,56 @@ key = bcrypt.kdf(password=PASSKEY, salt=PASSKEY, desired_key_bytes=32, rounds=10
 # Read the file in binary format
 with open(INPUT_FILE, 'rb') as f:
 	file_data = f.read()
-print(file_data)
+#print(file_data)
 
-if FUNCTION == "encrypt":
-	# Apply padding
-	file_data = Padding.pad(data_to_pad=file_data, block_size=BLOCK_SIZE)
+#if FUNCTION == "encrypt":
+# Apply padding
+file_data = Padding.pad(data_to_pad=file_data, block_size=BLOCK_SIZE)
 
-	# Encrypt the padded data
-	IV = os.urandom(BLOCK_SIZE)
-	encrypter = AES.new(key, AES.MODE_CBC, IV=IV)
-	ciphertext = encrypter.encrypt(file_data)
-	print(ciphertext)
+# Encrypt the padded data
+IV = os.urandom(BLOCK_SIZE)
+print("IV len = " + str(len(IV)))
+print(IV)
+encrypter = AES.new(key, AES.MODE_CBC, IV=IV)
+ciphertext = encrypter.encrypt(file_data)
+print(ciphertext)
 
-	# Overwrite the file with: hashed passkey + IV + encrypted data
+# Overwrite the file with: hashed passkey + IV + encrypted data
+hashed_passkey = bcrypt.hashpw(PASSKEY, bcrypt.gensalt(rounds=12))
+print(hashed_passkey)
+print(len(hashed_passkey))	
 
-elif FUNCTION == "decrypt":
-	# The encrypted file consists of: hashed passkey + IV + encrypted data
+with open(OUTPUT_FILE, 'w') as f:
+	f.write(str(hashed_passkey) + "|||" + str(IV) + "|||" + str(ciphertext))
 
-	# Verify that the passkey is correct
+#elif FUNCTION == "decrypt":
+with open(OUTPUT_FILE, 'r') as f:
+	file_data = f.read()
 
-	# Extract the IV
+# The encrypted file consists of: hashed passkey + IV + encrypted data
+#hashed_passkey = file_data[0:60]
+#IV = file_data[60:60 + BLOCK_SIZE]
+#ciphertext = file_data[60 + BLOCK_SIZE:]
+hashed_passkey = file_data.split("|||")[0]
+IV2 = file_data.split("|||")[1]
+ciphertext = file_data.split("|||")[2]
 
-	# Decrypt the padded data
-	decrypter = AES.new(key, AES.MODE_CBC, IV=IV)
-	plaintext = decrypter.decrypt(ciphertext)
+print("hashed_passkey = ")
+print(hashed_passkey)
+print("\nIV = ")
+print(IV2)
+print("\nciphertext = ")
+print(ciphertext)
+print(ciphertext.encode("latin-1"))
 
-	# Remove the padding to obtain the original text
-	plaintext = Padding.unpad(padded_data=plaintext, block_size=BLOCK_SIZE)
-	print(plaintext)
+# Verify that the passkey is correct
+
+# Extract the IV
+
+# Decrypt the padded data
+decrypter = AES.new(key, AES.MODE_CBC, IV=IV)
+plaintext = decrypter.decrypt(ciphertext.encode("utf-8"))
+
+# Remove the padding to obtain the original text
+plaintext = Padding.unpad(padded_data=plaintext, block_size=BLOCK_SIZE)
+print(plaintext)
