@@ -2,7 +2,6 @@ import sys
 import bcrypt
 from Crypto.Cipher import AES
 from Crypto.Util import Padding
-import binascii
 import os
 
 BLOCK_SIZE = 16 # For AES
