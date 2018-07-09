@@ -1,0 +1,2 @@
+pycrypto==2.6.1
+python_bcrypt==0.3.2
