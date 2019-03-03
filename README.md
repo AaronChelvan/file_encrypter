@@ -4,7 +4,7 @@
 ### Encryption 
 `python3 encrypt.py encrypt FILE_NAME PASSWORD`
 
-The encrypted file consists of: the hashed password, the IV, and encrypted data. All 3 of those are appended together in that order.
+The encrypted file is a JSON file consisting of: the hashed password, the IV, the salt used for generating the key, and the encrypted data.
 
 ### Decryption
 `python3 encrypt.py decrypt FILE_NAME PASSWORD`
